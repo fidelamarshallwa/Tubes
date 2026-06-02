@@ -37,14 +37,88 @@
     </style>
     <!-- Client-Side Session Guard & Data Sync -->
     <script>
+        // Ensure default database tables exist
+        if (!localStorage.getItem("logistel_users")) {
+            const defaultUsers = [
+                {
+                    Nama: "Fidela Marshallwa",
+                    Username: "adminfidelamarshallwa",
+                    Password: "salwa",
+                    Role: "Admin",
+                    Identitas: "198711032014022",
+                    Ormawa: "Logistik Kampus",
+                    Email: "admin@logistel.id",
+                    HP: "081122334455",
+                    Status: "Aktif"
+                },
+                {
+                    Nama: "Alya Maghfira",
+                    Username: "alyamaghfira@student.telkomuniversity.ac.id",
+                    Password: "alya",
+                    Role: "User",
+                    Identitas: "103112400240",
+                    Ormawa: "HMIF",
+                    Email: "alyamaghfira@student.telkomuniversity.ac.id",
+                    HP: "081234567890",
+                    Status: "Aktif"
+                }
+            ];
+            localStorage.setItem("logistel_users", JSON.stringify(defaultUsers));
+        }
+
+        const defaultInventaris = [
+            {
+                id: "B001",
+                nama: "Kamera",
+                tipe: "Barang",
+                stok: 10,
+                deskripsi: "Peralatan dokumentasi resolusi tinggi untuk event atau publikasi ormawa."
+            },
+            {
+                id: "B003",
+                nama: "Mic Wireless",
+                tipe: "Barang",
+                stok: 8,
+                deskripsi: "Paket mikrofon nirkabel beserta receiver suara untuk panggung/seminar."
+            },
+            {
+                id: "B006",
+                nama: "Meja Lipat",
+                tipe: "Barang",
+                stok: 0,
+                deskripsi: "Meja portable berbahan ringan untuk stand registrasi, rapat, atau bazar ormawa."
+            },
+            {
+                id: "R001",
+                nama: "DSP 301",
+                tipe: "Ruangan",
+                stok: 1,
+                deskripsi: "Ruang kelas dengan fasilitas proyektor, AC, kapasitas maksimum 40 orang."
+            },
+            {
+                id: "R023",
+                nama: "Aula Rachmat Effendy",
+                tipe: "Ruangan",
+                stok: 0,
+                deskripsi: "Gedung pertemuan serbaguna kapasitas besar. Cocok untuk seminar akbar/wisuda."
+            }
+        ];
+
+        if (!localStorage.getItem("logistel_fresh_start")) {
+            localStorage.setItem("logistel_inventaris", JSON.stringify(defaultInventaris));
+            localStorage.setItem("logistel_peminjaman", JSON.stringify([]));
+            localStorage.setItem("logistel_fresh_start", "true");
+        }
+
         // Check session before rendering page to prevent flicker
         const sessionStr = localStorage.getItem("logistel_session");
         if (!sessionStr) {
             window.location.href = 'login.html';
-        }
-        const sessionUser = JSON.parse(sessionStr);
-        if (sessionUser.Role !== 'Admin') {
-            window.location.href = 'login.html';
+        } else {
+            const sessionUser = JSON.parse(sessionStr);
+            if (sessionUser.Role !== 'Admin') {
+                window.location.href = 'login.html';
+            }
         }
     </script>
 </head>
@@ -264,6 +338,7 @@
                                     <th class="px-6 py-4">Nama Lengkap</th>
                                     <th class="px-6 py-4">Username</th>
                                     <th class="px-6 py-4">Peran (Role)</th>
+                                    <th class="px-6 py-4">Status</th>
                                     <th class="px-6 py-4">Detail Pengenal (NIM/NIP)</th>
                                     <th class="px-6 py-4">Ormawa / Satker</th>
                                     <th class="px-6 py-4 text-center">Aksi</th>
@@ -297,7 +372,7 @@
                         Daftar Barang (Logistik)
                     </button>
                     <button onclick="toggleInventarisSubTab('ruangan')" id="sub-tab-ruangan" class="pb-3 text-xs font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-900 transition duration-150">
-                        Daftar Ruangan Kuliah & Aula
+                        Daftar Ruangan 
                     </button>
                 </div>
 
@@ -314,54 +389,6 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
-                                <tr>
-                                    <td class="px-6 py-4 font-mono text-gray-400">#B001</td>
-                                    <td class="px-6 py-4 font-bold text-gray-900">KAMERA</td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-gray-800">10</span>
-                                            <span class="text-xs text-gray-500">Unit Tersedia</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="openEditStokModal('B001', 'KAMERA', 10)" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-telkom-700 hover:text-telkom-800 rounded-lg text-xs font-bold border border-gray-200 transition">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                            <span>Edit Stok</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 font-mono text-gray-400">#B003</td>
-                                    <td class="px-6 py-4 font-bold text-gray-900">MIC WIRELESS</td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-gray-800">8</span>
-                                            <span class="text-xs text-gray-500">Unit Tersedia</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="openEditStokModal('B003', 'MIC WIRELESS', 8)" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-telkom-700 hover:text-telkom-800 rounded-lg text-xs font-bold border border-gray-200 transition">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                            <span>Edit Stok</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 font-mono text-gray-400">#B006</td>
-                                    <td class="px-6 py-4 font-bold text-gray-900">MEJA LIPAT</td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-red-655 text-red-600">0</span>
-                                            <span class="text-[10px] text-red-700 font-bold bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">Kosong</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="openEditStokModal('B006', 'MEJA LIPAT', 0)" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-telkom-700 hover:text-telkom-800 rounded-lg text-xs font-bold border border-gray-200 transition">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                            <span>Edit Stok</span>
-                                        </button>
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -380,38 +407,6 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
-                                <tr>
-                                    <td class="px-6 py-4 font-mono text-gray-400">#R001</td>
-                                    <td class="px-6 py-4 font-bold text-gray-900">DSP 301</td>
-                                    <td class="px-6 py-4">
-                                        <span class="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-bold bg-emerald-50 border border-emerald-250 border-emerald-200 px-2.5 py-1 rounded-full">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                            Tersedia (Stok: 1)
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="openEditStokModal('R001', 'DSP 301 (Ruangan)', 1)" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-telkom-700 hover:text-telkom-800 rounded-lg text-xs font-bold border border-gray-200 transition">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                            <span>Ubah Status</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 font-mono text-gray-400">#R023</td>
-                                    <td class="px-6 py-4 font-bold text-gray-900">AULA RACHMAT EFFENDY</td>
-                                    <td class="px-6 py-4">
-                                        <span class="inline-flex items-center gap-1.5 text-xs text-red-700 font-bold bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                            Terisi/Penuh (Stok: 0)
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="openEditStokModal('R023', 'AULA RACHMAT EFFENDY', 0)" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-telkom-700 hover:text-telkom-800 rounded-lg text-xs font-bold border border-gray-200 transition">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                            <span>Ubah Status</span>
-                                        </button>
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -441,70 +436,6 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
-                                <!-- Row 1 -->
-                                <tr id="request-row-1">
-                                    <td class="px-6 py-4 font-mono text-telkom-700">#PMJ-902</td>
-                                    <td class="px-6 py-4 font-bold text-gray-900">
-                                        <span>HMIF</span>
-                                        <p class="text-xs text-gray-400 font-mono font-normal">NIM: 103112400240</p>
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-600">Rapat Kerja Harian Internal</td>
-                                    <td class="px-6 py-4">
-                                        <span class="text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded text-[10px] block w-fit mb-1">Ruangan</span>
-                                        <span class="text-gray-900 font-medium">DSP 301</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-xs text-gray-500 font-mono">
-                                            <p><span class="text-gray-400">Mulai:</span> 2026-06-03</p>
-                                            <p><span class="text-gray-400">Akhir:</span> 2026-06-04</p>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-500 max-w-xs truncate" title="Rapat evaluasi tengah tahunan dan koordinasi program kerja divisi logistik dan humas.">
-                                        Rapat evaluasi tengah tahunan dan koordinasi program...
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="flex justify-center gap-2">
-                                            <button onclick="openVerificationModal('approve', 'PMJ-902', 'HMIF')" class="px-3 py-1.5 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold tracking-wide transition">
-                                                ACC
-                                            </button>
-                                            <button onclick="openVerificationModal('reject', 'PMJ-902', 'HMIF')" class="px-3 py-1.5 bg-red-50 border border-red-200 hover:bg-red-100 text-red-700 rounded-lg text-xs font-bold tracking-wide transition">
-                                                Tolak
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- Row 2 -->
-                                <tr id="request-row-2">
-                                    <td class="px-6 py-4 font-mono text-telkom-700">#PMJ-903</td>
-                                    <td class="px-6 py-4 font-bold text-gray-900">
-                                        <span>BEM Fakultas Teknik</span>
-                                        <p class="text-xs text-gray-400 font-mono font-normal">NIM: 1202220199</p>
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-600">Dokumentasi Seminar Nasional</td>
-                                    <td class="px-6 py-4">
-                                        <span class="text-indigo-700 font-bold bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded text-[10px] block w-fit mb-1">Barang</span>
-                                        <span class="text-gray-900 font-medium">KAMERA (Jumlah: 2)</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-xs text-gray-500 font-mono">
-                                            <p><span class="text-gray-400">Mulai:</span> 2026-06-05</p>
-                                            <p><span class="text-gray-400">Akhir:</span> 2026-06-05</p>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-500 max-w-xs truncate" title="Seminar nasional karir dan kemahasiswaan bidang logistik digital dan IoT di aula utama.">
-                                        Seminar nasional karir dan kemahasiswaan bidang logistik...
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="flex justify-center gap-2">
-                                            <button onclick="openVerificationModal('approve', 'PMJ-903', 'BEM FT')" class="px-3 py-1.5 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold tracking-wide transition">
-                                                ACC
-                                            </button>
-                                            <button onclick="openVerificationModal('reject', 'PMJ-903', 'BEM FT')" class="px-3 py-1.5 bg-red-50 border border-red-200 hover:bg-red-100 text-red-700 rounded-lg text-xs font-bold tracking-wide transition">
-                                                Tolak
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -621,7 +552,7 @@
                     
                     <p id="barcode-info-text" class="text-xs text-telkom-750 text-telkom-700 mt-2 hidden flex items-center gap-1">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        <span>Menyetujui akan secara otomatis menjana Barcode Peminjaman baru untuk Ormawa.</span>
+                        <span>Peminjaman disetujui. Sistem berhasil membuat Barcode Peminjaman baru untuk Ormawa.</span>
                     </p>
                 </div>
 
@@ -765,6 +696,15 @@
                         class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-telkom-500 focus:border-telkom-700 text-sm transition">
                 </div>
 
+                <div>
+                    <label for="edit-status" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status Akun</label>
+                    <select id="edit-status" required
+                        class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-800 focus:outline-none focus:ring-1 focus:ring-telkom-500 focus:border-telkom-700 text-sm transition">
+                        <option value="Aktif">Aktif</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                    </select>
+                </div>
+
                 <div class="flex justify-end gap-3 pt-2">
                     <button type="button" onclick="closeEditPenggunaModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-600 text-xs font-bold rounded-xl transition">
                         Batal
@@ -779,7 +719,7 @@
 
     <!-- Client-Side Javascript Interactivity -->
     <script>
-        // Load logged-in administrator name
+        // Load logged-in administrator name and render initial tables
         document.addEventListener("DOMContentLoaded", function() {
             // Initialize default users database if not exists
             if (!localStorage.getItem("logistel_users")) {
@@ -792,7 +732,8 @@
                         Identitas: "198711032014022",
                         Ormawa: "Logistik Kampus",
                         Email: "admin@logistel.id",
-                        HP: "081122334455"
+                        HP: "081122334455",
+                        Status: "Aktif"
                     },
                     {
                         Nama: "Alya Maghfira",
@@ -802,12 +743,16 @@
                         Identitas: "103112400240",
                         Ormawa: "HMIF",
                         Email: "alyamaghfira@student.telkomuniversity.ac.id",
-                        HP: "081234567890"
+                        HP: "081234567890",
+                        Status: "Aktif"
                     }
                 ];
                 localStorage.setItem("logistel_users", JSON.stringify(defaultUsers));
             }
             renderPenggunaTable();
+            renderInventarisTable();
+            renderVerifikasiTable();
+            updateOverviewSection();
 
             const adminSession = JSON.parse(localStorage.getItem("logistel_session")) || { Nama: "Administrator" };
             document.getElementById("display-admin-name").innerText = adminSession.Nama;
@@ -946,6 +891,179 @@
             }
         }
 
+        // --- Dynamic Render Inventaris Table ---
+        function renderInventarisTable() {
+            const inventaris = JSON.parse(localStorage.getItem("logistel_inventaris")) || [];
+            
+            // Render Barang
+            const barangTbody = document.querySelector("#sub-content-barang tbody");
+            if (barangTbody) {
+                barangTbody.innerHTML = "";
+                const barangs = inventaris.filter(item => item.tipe === 'Barang');
+                barangs.forEach(item => {
+                    const tr = document.createElement("tr");
+                    tr.className = "hover:bg-gray-50/50 transition";
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 font-mono text-gray-400">#${item.id}</td>
+                        <td class="px-6 py-4 font-bold text-gray-900 uppercase">${item.nama}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                ${item.stok > 0 
+                                    ? `<span class="font-bold text-gray-800">${item.stok}</span><span class="text-xs text-gray-500">Unit Tersedia</span>` 
+                                    : `<span class="font-bold text-red-600">0</span><span class="text-[10px] text-red-700 font-bold bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">Kosong</span>`
+                                }
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="openEditStokModal('${item.id}', '${item.nama.replace(/'/g, "\\'")}', ${item.stok})" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-telkom-700 hover:text-telkom-800 rounded-lg text-xs font-bold border border-gray-200 transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <span>Edit Stok</span>
+                            </button>
+                            <button onclick="deleteInventaris('${item.id}', '${item.nama.replace(/'/g, "\\'")}')" class="inline-flex items-center justify-center p-1.5 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-800 border border-red-200 rounded-lg transition ml-2" title="Hapus Inventaris">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </td>
+                    `;
+                    barangTbody.appendChild(tr);
+                });
+            }
+
+            // Render Ruangan
+            const ruanganTbody = document.querySelector("#sub-content-ruangan tbody");
+            if (ruanganTbody) {
+                ruanganTbody.innerHTML = "";
+                const ruangans = inventaris.filter(item => item.tipe === 'Ruangan');
+                ruangans.forEach(item => {
+                    const tr = document.createElement("tr");
+                    tr.className = "hover:bg-gray-50/50 transition";
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 font-mono text-gray-400">#${item.id}</td>
+                        <td class="px-6 py-4 font-bold text-gray-900 uppercase">${item.nama}</td>
+                        <td class="px-6 py-4">
+                            ${item.stok > 0 
+                                ? `<span class="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Tersedia (Stok: 1)</span>` 
+                                : `<span class="inline-flex items-center gap-1.5 text-xs text-red-700 font-bold bg-red-50 border border-red-200 px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Terisi/Penuh (Stok: 0)</span>`
+                            }
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="openEditStokModal('${item.id}', '${item.nama.replace(/'/g, "\\'")}', ${item.stok})" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-telkom-700 hover:text-telkom-800 rounded-lg text-xs font-bold border border-gray-200 transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <span>Ubah Status</span>
+                            </button>
+                            <button onclick="deleteInventaris('${item.id}', '${item.nama.replace(/'/g, "\\'")}')" class="inline-flex items-center justify-center p-1.5 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-800 border border-red-200 rounded-lg transition ml-2" title="Hapus Inventaris">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </td>
+                    `;
+                    ruanganTbody.appendChild(tr);
+                });
+            }
+        }
+
+        // --- Dynamic Render Verifikasi Table ---
+        function renderVerifikasiTable() {
+            const peminjamans = JSON.parse(localStorage.getItem("logistel_peminjaman")) || [];
+            const pendingRequests = peminjamans.filter(p => p.status === 'PENDING');
+            const tbody = document.querySelector("#verifikasi-section tbody");
+            if (!tbody) return;
+            
+            tbody.innerHTML = "";
+            
+            // Update badge count
+            const badge = document.getElementById('pending-badge-count');
+            if (badge) {
+                badge.innerText = pendingRequests.length;
+                if (pendingRequests.length === 0) {
+                    badge.classList.add('hidden');
+                } else {
+                    badge.classList.remove('hidden');
+                }
+            }
+            
+            if (pendingRequests.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500 font-medium bg-white">
+                            Tidak ada berkas peminjaman pending yang memerlukan verifikasi.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            pendingRequests.forEach(p => {
+                const tr = document.createElement("tr");
+                tr.id = `request-row-${p.id}`;
+                tr.className = "hover:bg-gray-50/50 transition border-b border-gray-150";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-mono text-telkom-700">#${p.id}</td>
+                    <td class="px-6 py-4 font-bold text-gray-900">
+                        <span>${p.ormawa}</span>
+                        <p class="text-xs text-gray-400 font-mono font-normal">NIM: ${p.nim}</p>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">${p.namaKegiatan}</td>
+                    <td class="px-6 py-4">
+                        <span class="${p.jenis === 'Ruangan' ? 'text-emerald-700 bg-emerald-50 border border-emerald-100' : 'text-indigo-700 bg-indigo-50 border border-indigo-100'} font-bold px-2 py-0.5 rounded text-[10px] block w-fit mb-1">${p.jenis}</span>
+                        <span class="text-gray-900 font-medium">${p.itemNama} ${p.jenis === 'Barang' ? `(Jumlah: ${p.jumlah})` : ''}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-xs text-gray-500 font-mono">
+                            <p><span class="text-gray-400">Mulai:</span> ${p.tanggalMulai}</p>
+                            <p><span class="text-gray-400">Akhir:</span> ${p.tanggalSelesai}</p>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500 max-w-xs truncate" title="${p.deskripsi}">
+                        ${p.deskripsi}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex justify-center gap-2">
+                            <button onclick="openVerificationModal('approve', '${p.id}', '${p.ormawa.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold tracking-wide transition">
+                                ACC
+                            </button>
+                            <button onclick="openVerificationModal('reject', '${p.id}', '${p.ormawa.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-50 border border-red-200 hover:bg-red-100 text-red-700 rounded-lg text-xs font-bold tracking-wide transition">
+                                Tolak
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Dynamic Render Overview Stats ---
+        function updateOverviewSection() {
+            const inventaris = JSON.parse(localStorage.getItem("logistel_inventaris")) || [];
+            const peminjamans = JSON.parse(localStorage.getItem("logistel_peminjaman")) || [];
+            
+            const barangs = inventaris.filter(item => item.tipe === 'Barang');
+            const totalBarangQty = barangs.reduce((sum, item) => sum + item.stok, 0);
+            const ruangans = inventaris.filter(item => item.tipe === 'Ruangan');
+            const totalRuanganCount = ruangans.length;
+            const availableRuangan = ruangans.filter(item => item.stok > 0).length;
+            
+            const pendingCount = peminjamans.filter(p => p.status === 'PENDING').length;
+            const approvedCount = peminjamans.filter(p => p.status === 'APPROVED').length;
+            
+            const cards = document.querySelectorAll("#overview-section .grid > div");
+            if (cards.length >= 4) {
+                // Card 1: Total Barang
+                cards[0].querySelector(".text-2xl").innerText = `${barangs.length} Kategori`;
+                cards[0].querySelector(".text-\\[11px\\]").innerHTML = `<span class="text-emerald-600 font-bold">${totalBarangQty} unit</span> total stok tersedia`;
+                
+                // Card 2: Total Ruangan
+                cards[1].querySelector(".text-2xl").innerText = `${totalRuanganCount} Ruangan`;
+                cards[1].querySelector(".text-\\[11px\\]").innerHTML = `<span class="text-emerald-600 font-bold">${availableRuangan} tersedia</span> dalam database`;
+                
+                // Card 3: Butuh Verifikasi
+                cards[2].querySelector(".text-2xl").innerText = `${pendingCount} Berkas`;
+                cards[2].querySelector(".text-2xl").className = `text-2xl font-bold ${pendingCount > 0 ? 'text-amber-600' : 'text-gray-900'} mt-2`;
+                cards[2].querySelector(".text-\\[11px\\]").className = `text-\\[11px\\] ${pendingCount > 0 ? 'text-amber-600 font-bold' : 'text-gray-500'} mt-2 uppercase tracking-wider`;
+                
+                // Card 4: Peminjaman Aktif
+                cards[3].querySelector(".text-2xl").innerText = `${approvedCount} Transaksi`;
+            }
+        }
+
         // --- Edit Stok Modal Logic ---
         function openEditStokModal(id, nama, currentStok) {
             const modal = document.getElementById('edit-stok-modal');
@@ -975,6 +1093,7 @@
             }, 10);
         }
 
+        // Close Edit Stok
         function closeEditStokModal() {
             const modal = document.getElementById('edit-stok-modal');
             modal.classList.add('opacity-0');
@@ -1031,6 +1150,7 @@
             }, 10);
         }
 
+        // Close verification modal
         function closeVerificationModal() {
             const modal = document.getElementById('verif-modal');
             modal.classList.add('opacity-0');
@@ -1042,33 +1162,115 @@
             }, 200);
         }
 
-        // Mock confirmation trigger
+        // Submit form verifikasi (ACC/Tolak)
         document.getElementById('form-verifikasi').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const id = document.getElementById('verif-peminjaman-id').value;
             const status = document.getElementById('verif-status-val').value;
+            const catatan = document.getElementById('verif-catatan').value.trim();
             
-            alert(`Aksi simulasi berhasil! Berkas #${id} berstatus ${status}.`);
+            const peminjamans = JSON.parse(localStorage.getItem("logistel_peminjaman")) || [];
+            const index = peminjamans.findIndex(p => p.id === id);
             
-            if (id === 'PMJ-902') {
-                const row = document.getElementById('request-row-1');
-                if (row) row.remove();
-            } else if (id === 'PMJ-903') {
-                const row = document.getElementById('request-row-2');
-                if (row) row.remove();
-            }
-            
-            const badge = document.getElementById('pending-badge-count');
-            let current = parseInt(badge.innerText);
-            if (current > 0) {
-                badge.innerText = current - 1;
-                if (current - 1 === 0) {
-                    badge.classList.add('hidden');
+            if (index !== -1) {
+                peminjamans[index].status = status;
+                peminjamans[index].catatan = catatan;
+                
+                if (status === 'APPROVED') {
+                    // Generate barcode
+                    peminjamans[index].barcode = `${peminjamans[index].ormawa.replace(/\s+/g, '')}-${peminjamans[index].id}-BAR`;
+                    
+                    // Deduct stock
+                    const inventaris = JSON.parse(localStorage.getItem("logistel_inventaris")) || [];
+                    const itemIndex = inventaris.findIndex(item => item.id === peminjamans[index].itemId);
+                    if (itemIndex !== -1) {
+                        if (inventaris[itemIndex].tipe === 'Barang') {
+                            inventaris[itemIndex].stok = Math.max(0, inventaris[itemIndex].stok - peminjamans[index].jumlah);
+                        } else {
+                            inventaris[itemIndex].stok = 0; // Mark room as Terisi/Penuh
+                        }
+                        localStorage.setItem("logistel_inventaris", JSON.stringify(inventaris));
+                    }
+                    
+                    alert("Peminjaman disetujui. Sistem berhasil membuat Barcode Peminjaman baru untuk Ormawa.");
+                } else {
+                    alert(`Peminjaman ditolak. Berkas #${id} berhasil diperbarui.`);
                 }
+                
+                localStorage.setItem("logistel_peminjaman", JSON.stringify(peminjamans));
+                
+                renderVerifikasiTable();
+                renderInventarisTable();
+                updateOverviewSection();
+                closeVerificationModal();
+            }
+        });
+
+        // Form Submit Handler for Add Inventaris
+        document.getElementById('form-tambah-inventaris').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const tipe = document.getElementById('input-tipe').value;
+            const nama = document.getElementById('input-nama').value.trim();
+            const stok = parseInt(document.getElementById('input-stok').value) || 0;
+            
+            const inventaris = JSON.parse(localStorage.getItem("logistel_inventaris")) || [];
+            
+            const prefix = tipe === 'Barang' ? 'B' : 'R';
+            const itemsOfType = inventaris.filter(item => item.tipe === tipe);
+            let nextNum = 1;
+            if (itemsOfType.length > 0) {
+                const nums = itemsOfType.map(item => {
+                    const numPart = item.id.replace(/^[A-Z]+/, '');
+                    return parseInt(numPart) || 0;
+                });
+                nextNum = Math.max(...nums) + 1;
+            }
+            const newId = prefix + String(nextNum).padStart(3, '0');
+            
+            let deskripsi = "";
+            if (tipe === 'Barang') {
+                deskripsi = "Peralatan logistik tambahan untuk mendukung berbagai program kerja ormawa.";
+            } else {
+                deskripsi = "Fasilitas ruangan kampus Universitas Telkom Purwokerto.";
             }
             
-            closeVerificationModal();
+            const newItem = {
+                id: newId,
+                nama: nama,
+                tipe: tipe,
+                stok: stok,
+                deskripsi: deskripsi
+            };
+            
+            inventaris.push(newItem);
+            localStorage.setItem("logistel_inventaris", JSON.stringify(inventaris));
+            
+            renderInventarisTable();
+            updateOverviewSection();
+            closeAddModal();
+            document.getElementById('form-tambah-inventaris').reset();
+            alert(`Inventaris ${newItem.nama} (${tipe}) berhasil ditambahkan dengan ID #${newId}!`);
+        });
+
+        // Form Submit Handler for Edit Stok
+        document.getElementById('form-edit-stok').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const newStok = parseInt(document.getElementById('edit-stok-val').value) || 0;
+            
+            const inventaris = JSON.parse(localStorage.getItem("logistel_inventaris")) || [];
+            const index = inventaris.findIndex(item => item.id === id);
+            
+            if (index !== -1) {
+                inventaris[index].stok = newStok;
+                localStorage.setItem("logistel_inventaris", JSON.stringify(inventaris));
+                
+                renderInventarisTable();
+                updateOverviewSection();
+                closeEditStokModal();
+                alert(`Stok/status untuk ${inventaris[index].nama} berhasil diperbarui!`);
+            }
         });
 
         // --- User Management CRUD Logic ---
@@ -1088,6 +1290,12 @@
                     <td class="px-6 py-4 text-gray-500">${u.Username}</td>
                     <td class="px-6 py-4">
                         <span class="${u.Role === 'Admin' ? 'bg-red-50 border border-red-200 text-telkom-700' : 'bg-gray-100 border border-gray-200 text-gray-600'} text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">${u.Role}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center gap-1 text-xs ${u.Status === 'Aktif' ? 'text-emerald-700 bg-emerald-50 border border-emerald-250 border-emerald-200' : 'text-red-700 bg-red-50 border border-red-200'} px-2.5 py-0.5 rounded-full font-bold">
+                            <span class="w-1.5 h-1.5 rounded-full ${u.Status === 'Aktif' ? 'bg-emerald-500' : 'bg-red-500'}"></span>
+                            ${u.Status || 'Aktif'}
+                        </span>
                     </td>
                     <td class="px-6 py-4 font-mono text-gray-500">${u.Identitas}</td>
                     <td class="px-6 py-4 text-gray-600">${u.Ormawa}</td>
@@ -1147,7 +1355,6 @@
 
             const users = JSON.parse(localStorage.getItem("logistel_users")) || [];
             
-            // Check if username already exists to prevent duplicate username issues
             if (users.some(u => u.Username.toLowerCase() === username.toLowerCase())) {
                 errorMsg.innerText = "Username sudah terdaftar!";
                 errorAlert.classList.remove('hidden');
@@ -1162,7 +1369,8 @@
                 Identitas: identitas,
                 Ormawa: ormawa,
                 Email: username,
-                HP: "081234567890" // Default Phone Number
+                HP: "081234567890",
+                Status: "Aktif"
             });
 
             localStorage.setItem("logistel_users", JSON.stringify(users));
@@ -1183,6 +1391,7 @@
             document.getElementById('edit-role').value = user.Role || 'User';
             document.getElementById('edit-identitas').value = user.Identitas || '';
             document.getElementById('edit-ormawa').value = user.Ormawa || '';
+            document.getElementById('edit-status').value = user.Status || 'Aktif';
             
             document.getElementById('edit-pengguna-error-alert').classList.add('hidden');
 
@@ -1212,6 +1421,7 @@
             const role = document.getElementById('edit-role').value;
             const identitas = document.getElementById('edit-identitas').value.trim();
             const ormawa = document.getElementById('edit-ormawa').value.trim();
+            const status = document.getElementById('edit-status').value;
             
             const errorAlert = document.getElementById('edit-pengguna-error-alert');
             const errorMsg = document.getElementById('edit-pengguna-error-message');
@@ -1224,7 +1434,6 @@
 
             const users = JSON.parse(localStorage.getItem("logistel_users")) || [];
             
-            // Check for duplicate username except itself
             if (users.some((u, idx) => idx !== index && u.Username.toLowerCase() === username.toLowerCase())) {
                 errorMsg.innerText = "Username sudah terdaftar oleh pengguna lain!";
                 errorAlert.classList.remove('hidden');
@@ -1238,7 +1447,8 @@
                 users[index].Role = role;
                 users[index].Identitas = identitas;
                 users[index].Ormawa = ormawa;
-                users[index].Email = username; // Sync email with username
+                users[index].Email = username;
+                users[index].Status = status;
                 
                 localStorage.setItem("logistel_users", JSON.stringify(users));
                 renderPenggunaTable();
@@ -1256,6 +1466,18 @@
                 users.splice(index, 1);
                 localStorage.setItem("logistel_users", JSON.stringify(users));
                 renderPenggunaTable();
+            }
+        }
+
+        // --- Delete Inventaris Logic ---
+        function deleteInventaris(id, nama) {
+            if (confirm("Apakah Anda yakin ingin menghapus inventaris ini? Tindakan ini akan menghapusnya dari katalog pengguna secara permanen.")) {
+                const inventaris = JSON.parse(localStorage.getItem("logistel_inventaris")) || [];
+                const updatedInventaris = inventaris.filter(item => item.id !== id);
+                localStorage.setItem("logistel_inventaris", JSON.stringify(updatedInventaris));
+                
+                renderInventarisTable();
+                updateOverviewSection();
             }
         }
     </script>

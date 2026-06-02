@@ -159,7 +159,8 @@
                     Identitas: "198711032014022",
                     Ormawa: "Logistik Kampus",
                     Email: "admin@logistel.id",
-                    HP: "081122334455"
+                    HP: "081122334455",
+                    Status: "Aktif"
                 },
                 {
                     Nama: "Alya Maghfira",
@@ -169,10 +170,75 @@
                     Identitas: "103112400240",
                     Ormawa: "HMIF",
                     Email: "alyamaghfira@student.telkomuniversity.ac.id",
-                    HP: "081234567890"
+                    HP: "081234567890",
+                    Status: "Aktif"
                 }
             ];
             localStorage.setItem("logistel_users", JSON.stringify(defaultUsers));
+        }
+
+        // Auto-redirect if already logged in with an active account
+        const existingSession = localStorage.getItem("logistel_session");
+        if (existingSession) {
+            try {
+                const sessionUser = JSON.parse(existingSession);
+                const usersList = JSON.parse(localStorage.getItem("logistel_users")) || [];
+                const currentUserData = usersList.find(u => u.Username.toLowerCase() === sessionUser.Email.toLowerCase());
+                if (currentUserData && currentUserData.Status === "Aktif") {
+                    if (sessionUser.Role === 'Admin') {
+                        window.location.href = 'dashboard-admin.html';
+                    } else if (sessionUser.Role === 'User') {
+                        window.location.href = 'dashboard-user.html';
+                    }
+                }
+            } catch (e) {
+                localStorage.removeItem("logistel_session");
+            }
+        }
+
+        // Initialize default global inventory and reset history (Fresh Start)
+        const defaultInventaris = [
+            {
+                id: "B001",
+                nama: "Kamera",
+                tipe: "Barang",
+                stok: 10,
+                deskripsi: "Peralatan dokumentasi resolusi tinggi untuk event atau publikasi ormawa."
+            },
+            {
+                id: "B003",
+                nama: "Mic Wireless",
+                tipe: "Barang",
+                stok: 8,
+                deskripsi: "Paket mikrofon nirkabel beserta receiver suara untuk panggung/seminar."
+            },
+            {
+                id: "B006",
+                nama: "Meja Lipat",
+                tipe: "Barang",
+                stok: 0,
+                deskripsi: "Meja portable berbahan ringan untuk stand registrasi, rapat, atau bazar ormawa."
+            },
+            {
+                id: "R001",
+                nama: "DSP 301",
+                tipe: "Ruangan",
+                stok: 1,
+                deskripsi: "Ruang kelas dengan fasilitas proyektor, AC, kapasitas maksimum 40 orang."
+            },
+            {
+                id: "R023",
+                nama: "Aula Rachmat Effendy",
+                tipe: "Ruangan",
+                stok: 0,
+                deskripsi: "Gedung pertemuan serbaguna kapasitas besar. Cocok untuk seminar akbar/wisuda."
+            }
+        ];
+
+        if (!localStorage.getItem("logistel_fresh_start")) {
+            localStorage.setItem("logistel_inventaris", JSON.stringify(defaultInventaris));
+            localStorage.setItem("logistel_peminjaman", JSON.stringify([]));
+            localStorage.setItem("logistel_fresh_start", "true");
         }
 
         function togglePasswordVisibility() {
@@ -217,6 +283,13 @@
             );
 
             if (matchedUser) {
+                // Check user status
+                if (matchedUser.Status !== "Aktif") {
+                    alertMsg.innerText = "Akun Anda berstatus tidak aktif! Silakan hubungi Administrator.";
+                    alertBox.classList.remove('hidden');
+                    return;
+                }
+
                 // Construct session data
                 const userSession = {
                     Nama: matchedUser.Nama,

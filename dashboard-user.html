@@ -37,14 +37,97 @@
     </style>
     <!-- Client-Side Session Guard & Data Sync -->
     <script>
+        // Ensure default database tables exist
+        if (!localStorage.getItem("logistel_users")) {
+            const defaultUsers = [
+                {
+                    Nama: "Fidela Marshallwa",
+                    Username: "adminfidelamarshallwa",
+                    Password: "salwa",
+                    Role: "Admin",
+                    Identitas: "198711032014022",
+                    Ormawa: "Logistik Kampus",
+                    Email: "admin@logistel.id",
+                    HP: "081122334455",
+                    Status: "Aktif"
+                },
+                {
+                    Nama: "Alya Maghfira",
+                    Username: "alyamaghfira@student.telkomuniversity.ac.id",
+                    Password: "alya",
+                    Role: "User",
+                    Identitas: "103112400240",
+                    Ormawa: "HMIF",
+                    Email: "alyamaghfira@student.telkomuniversity.ac.id",
+                    HP: "081234567890",
+                    Status: "Aktif"
+                }
+            ];
+            localStorage.setItem("logistel_users", JSON.stringify(defaultUsers));
+        }
+
+        const defaultInventaris = [
+            {
+                id: "B001",
+                nama: "Kamera",
+                tipe: "Barang",
+                stok: 10,
+                deskripsi: "Peralatan dokumentasi resolusi tinggi untuk event atau publikasi ormawa."
+            },
+            {
+                id: "B003",
+                nama: "Mic Wireless",
+                tipe: "Barang",
+                stok: 8,
+                deskripsi: "Paket mikrofon nirkabel beserta receiver suara untuk panggung/seminar."
+            },
+            {
+                id: "B006",
+                nama: "Meja Lipat",
+                tipe: "Barang",
+                stok: 0,
+                deskripsi: "Meja portable berbahan ringan untuk stand registrasi, rapat, atau bazar ormawa."
+            },
+            {
+                id: "R001",
+                nama: "DSP 301",
+                tipe: "Ruangan",
+                stok: 1,
+                deskripsi: "Ruang kelas dengan fasilitas proyektor, AC, kapasitas maksimum 40 orang."
+            },
+            {
+                id: "R023",
+                nama: "Aula Rachmat Effendy",
+                tipe: "Ruangan",
+                stok: 0,
+                deskripsi: "Gedung pertemuan serbaguna kapasitas besar. Cocok untuk seminar akbar/wisuda."
+            }
+        ];
+
+        if (!localStorage.getItem("logistel_fresh_start")) {
+            localStorage.setItem("logistel_inventaris", JSON.stringify(defaultInventaris));
+            localStorage.setItem("logistel_peminjaman", JSON.stringify([]));
+            localStorage.setItem("logistel_fresh_start", "true");
+        }
+
         // Check session before rendering page to prevent flicker
         const sessionStr = localStorage.getItem("logistel_session");
         if (!sessionStr) {
             window.location.href = 'login.html';
-        }
-        const sessionUser = JSON.parse(sessionStr);
-        if (sessionUser.Role !== 'User') {
-            window.location.href = 'login.html';
+        } else {
+            const sessionUser = JSON.parse(sessionStr);
+            if (sessionUser.Role !== 'User') {
+                window.location.href = 'login.html';
+            } else {
+                // Check status of current user
+                const usersList = JSON.parse(localStorage.getItem("logistel_users")) || [];
+                const currentUserData = usersList.find(u => u.Username.toLowerCase() === sessionUser.Email.toLowerCase());
+                if (!currentUserData || currentUserData.Status !== "Aktif") {
+                    localStorage.removeItem("logistel_session");
+                    alert("Akses Ditolak. Akun Anda tidak aktif atau telah dihapus! Silakan hubungi Administrator.");
+                    window.location.href = 'login.html';
+                }
+            }
         }
     </script>
 </head>
@@ -201,95 +284,6 @@
 
                 <!-- Grid of items -->
                 <div id="catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Item 1: Camera -->
-                    <div class="catalog-card bg-white border border-gray-200 hover:border-telkom-500/50 rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 group shadow-sm hover:shadow-md" data-type="Barang" data-name="kamera dslr">
-                        <div>
-                            <div class="flex justify-between items-start mb-3">
-                                <span class="bg-red-50 border border-red-100 text-telkom-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">Barang</span>
-                                <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Stok: 10 Unit</span>
-                            </div>
-                            <h4 class="text-base font-bold text-gray-900 group-hover:text-telkom-700 transition mb-1">KAMERA DSLR</h4>
-                            <p class="text-xs text-gray-500 leading-relaxed mb-4">Peralatan dokumentasi resolusi tinggi untuk event atau publikasi ormawa.</p>
-                        </div>
-                        <button onclick="quickBorrow('Barang', 'KAMERA')" class="w-full py-2 bg-gray-100 hover:bg-telkom-700 text-gray-700 hover:text-white font-semibold rounded-xl text-xs border border-gray-200 hover:border-telkom-600 transition-all duration-150">
-                            Pinjam Sekarang
-                        </button>
-                    </div>
-
-                    <!-- Item 2: Wireless Mic -->
-                    <div class="catalog-card bg-white border border-gray-200 hover:border-telkom-500/50 rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 group shadow-sm hover:shadow-md" data-type="Barang" data-name="mic wireless">
-                        <div>
-                            <div class="flex justify-between items-start mb-3">
-                                <span class="bg-red-50 border border-red-100 text-telkom-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">Barang</span>
-                                <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Stok: 8 Unit</span>
-                            </div>
-                            <h4 class="text-base font-bold text-gray-900 group-hover:text-telkom-700 transition mb-1">MIC WIRELESS</h4>
-                            <p class="text-xs text-gray-500 leading-relaxed mb-4">Paket mikrofon nirkabel beserta receiver suara untuk panggung/seminar.</p>
-                        </div>
-                        <button onclick="quickBorrow('Barang', 'MIC WIRELESS')" class="w-full py-2 bg-gray-100 hover:bg-telkom-700 text-gray-700 hover:text-white font-semibold rounded-xl text-xs border border-gray-200 hover:border-telkom-600 transition-all duration-150">
-                            Pinjam Sekarang
-                        </button>
-                    </div>
-
-                    <!-- Item 3: Ruangan DSP 301 -->
-                    <div class="catalog-card bg-white border border-gray-200 hover:border-telkom-500/50 rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 group shadow-sm hover:shadow-md" data-type="Ruangan" data-name="ruangan dsp 301">
-                        <div>
-                            <div class="flex justify-between items-start mb-3">
-                                <span class="bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">Ruangan</span>
-                                <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Tersedia</span>
-                            </div>
-                            <h4 class="text-base font-bold text-gray-900 group-hover:text-telkom-700 transition mb-1">RUANGAN DSP 301</h4>
-                            <p class="text-xs text-gray-500 leading-relaxed mb-4">Ruang kelas dengan fasilitas proyektor, AC, kapasitas maksimum 40 orang.</p>
-                        </div>
-                        <button onclick="quickBorrow('Ruangan', 'DSP 301')" class="w-full py-2 bg-gray-100 hover:bg-telkom-700 text-gray-700 hover:text-white font-semibold rounded-xl text-xs border border-gray-200 hover:border-telkom-600 transition-all duration-150">
-                            Pinjam Sekarang
-                        </button>
-                    </div>
-
-                    <!-- Item 4: Aula Rachmat Effendy -->
-                    <div class="catalog-card bg-white border border-gray-200 hover:border-telkom-500/50 rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 group shadow-sm hover:shadow-md" data-type="Ruangan" data-name="aula rachmat effendy">
-                        <div>
-                            <div class="flex justify-between items-start mb-3">
-                                <span class="bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">Ruangan</span>
-                                <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Tersedia</span>
-                            </div>
-                            <h4 class="text-base font-bold text-gray-900 group-hover:text-telkom-700 transition mb-1">AULA RACHMAT EFFENDY</h4>
-                            <p class="text-xs text-gray-500 leading-relaxed mb-4">Gedung pertemuan serbaguna kapasitas besar. Cocok untuk seminar akbar/wisuda.</p>
-                        </div>
-                        <button onclick="quickBorrow('Ruangan', 'AULA RACHMAT EFFENDY')" class="w-full py-2 bg-gray-100 hover:bg-telkom-700 text-gray-700 hover:text-white font-semibold rounded-xl text-xs border border-gray-200 hover:border-telkom-600 transition-all duration-150">
-                            Pinjam Sekarang
-                        </button>
-                    </div>
-
-                    <!-- Item 5: Meja Lipat -->
-                    <div class="catalog-card bg-white border border-gray-200 hover:border-telkom-500/50 rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 group shadow-sm hover:shadow-md" data-type="Barang" data-name="meja lipat">
-                        <div>
-                            <div class="flex justify-between items-start mb-3">
-                                <span class="bg-red-50 border border-red-100 text-telkom-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">Barang</span>
-                                <span class="bg-red-50 text-red-700 border border-red-100 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Stok Kosong</span>
-                            </div>
-                            <h4 class="text-base font-bold text-gray-900 group-hover:text-telkom-700 transition mb-1">MEJA LIPAT</h4>
-                            <p class="text-xs text-gray-500 leading-relaxed mb-4">Meja portable berbahan ringan untuk stand registrasi, rapat, atau bazar ormawa.</p>
-                        </div>
-                        <button disabled class="w-full py-2 bg-gray-50 text-gray-400 font-semibold rounded-xl text-xs border border-gray-100 cursor-not-allowed">
-                            Stok Kosong
-                        </button>
-                    </div>
-
-                    <!-- Item 6: GOR DI PANDJAITAN -->
-                    <div class="catalog-card bg-white border border-gray-200 hover:border-telkom-500/50 rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 group shadow-sm hover:shadow-md" data-type="Ruangan" data-name="gor di pandjaitan">
-                        <div>
-                            <div class="flex justify-between items-start mb-3">
-                                <span class="bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">Ruangan</span>
-                                <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Tersedia</span>
-                            </div>
-                            <h4 class="text-base font-bold text-gray-900 group-hover:text-telkom-700 transition mb-1">GOR DI PANDJAITAN</h4>
-                            <p class="text-xs text-gray-500 leading-relaxed mb-4">Gedung Olahraga indoor serbaguna untuk latihan bulu tangkis, basket, dan acara musik.</p>
-                        </div>
-                        <button onclick="quickBorrow('Ruangan', 'GOR DI PANDJAITAN')" class="w-full py-2 bg-gray-100 hover:bg-telkom-700 text-gray-700 hover:text-white font-semibold rounded-xl text-xs border border-gray-200 hover:border-telkom-600 transition-all duration-150">
-                            Pinjam Sekarang
-                        </button>
-                    </div>
                 </div>
             </section>
 
@@ -396,75 +390,8 @@
                                     <th class="px-6 py-4 text-center">Barcode</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
-                                <!-- Pending Row -->
-                                <tr>
-                                    <td class="px-6 py-4 font-mono text-telkom-700">#PMJ-902</td>
-                                    <td class="px-6 py-4 font-semibold text-gray-900">Rapat Kerja Harian Internal</td>
-                                    <td class="px-6 py-4 text-gray-600">DSP 301 (Ruangan)</td>
-                                    <td class="px-6 py-4 text-gray-500 font-mono text-xs">2026-06-03 s/d 2026-06-04</td>
-                                    <td class="px-6 py-4">
-                                        <span class="inline-flex items-center gap-1.5 text-xs text-amber-700 font-semibold bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                            PENDING
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-center text-gray-400 font-mono text-xs">-</td>
-                                </tr>
-
-                                <!-- Approved Row -->
-                                <tr>
-                                    <td class="px-6 py-4 font-mono text-telkom-700">#PMJ-881</td>
-                                    <td class="px-6 py-4 font-semibold text-gray-900">Latihan Koordinasi Sound System</td>
-                                    <td class="px-6 py-4 text-gray-600">MIC WIRELESS (2 Unit)</td>
-                                    <td class="px-6 py-4 text-gray-500 font-mono text-xs">2026-05-28 s/d 2026-05-28</td>
-                                    <td class="px-6 py-4">
-                                        <span class="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                            APPROVED
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="openBarcodeModal('PMJ-881', 'MIC WIRELESS', 'HMTF-881-BAR')" class="px-2.5 py-1 bg-red-50 border border-red-200 hover:bg-red-100 text-telkom-700 text-xs font-semibold rounded-md transition font-mono">
-                                            Lihat Barcode
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- Rejected Row -->
-                                <tr>
-                                    <td class="px-6 py-4 font-mono text-telkom-700">#PMJ-874</td>
-                                    <td class="px-6 py-4 font-semibold text-gray-900">Pameran Bazar Kewirausahaan</td>
-                                    <td class="px-6 py-4 text-gray-600">MEJA LIPAT (12 Unit)</td>
-                                    <td class="px-6 py-4 text-gray-500 font-mono text-xs">2026-05-20 s/d 2026-05-22</td>
-                                    <td class="px-6 py-4">
-                                        <span class="inline-flex items-center gap-1.5 text-xs text-red-700 font-semibold bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full" title="Ditolak karena stok meja lipat tidak mencukupi untuk jumlah yang diminta.">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                            REJECTED
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-center text-gray-400 font-mono text-xs">-</td>
-                                </tr>
-
-                                <!-- Returned Row -->
-                                <tr>
-                                    <td class="px-6 py-4 font-mono text-telkom-700">#PMJ-820</td>
-                                    <td class="px-6 py-4 font-semibold text-gray-900">Workshop Videografi Digital</td>
-                                    <td class="px-6 py-4 text-gray-600">KAMERA DSLR (1 Unit)</td>
-                                    <td class="px-6 py-4 text-gray-500 font-mono text-xs">2026-05-01 s/d 2026-05-02</td>
-                                    <td class="px-6 py-4">
-                                        <span class="inline-flex items-center gap-1.5 text-xs text-blue-700 font-semibold bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                                            RETURNED
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="openBarcodeModal('PMJ-820', 'KAMERA DSLR (Returned)', 'HMTF-820-BAR-RET')" class="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-md transition font-mono">
-                                            Arsip Barcode
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
+                             <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
+                             </tbody>
                         </table>
                     </div>
                 </div>
@@ -594,6 +521,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             // Retrieve session data
             const userSession = JSON.parse(localStorage.getItem("logistel_session"));
+            if (!userSession) return;
             
             // Map values to DOM Elements in Profile Card
             document.getElementById("display-nama").innerText = userSession.Nama;
@@ -621,7 +549,9 @@
             }
             document.getElementById("display-prodi").innerText = prodiText;
 
-            // Initialize default catalog dropdown
+            // Render catalog & history dynamically
+            renderCatalog();
+            renderRiwayatTable();
             handleFormTypeChange();
         });
 
@@ -631,39 +561,175 @@
             window.location.href = 'login.html';
         }
 
-        // Array of inventory options
-        const inventarisData = {
-            'Barang': [
-                { id: '1', name: 'KAMERA' },
-                { id: '2', name: 'STAND MIC' },
-                { id: '3', name: 'MIC WIRELESS' },
-                { id: '4', name: 'BENDERA' },
-                { id: '5', name: 'NAMPAN' },
-                { id: '6', name: 'MEJA' },
-                { id: '7', name: 'SOFA' }
-            ],
-            'Ruangan': [
-                { id: '101', name: 'DSP 301' },
-                { id: '102', name: 'DSP 302' },
-                { id: '103', name: 'DSP 303' },
-                { id: '123', name: 'AULA RACHMAT EFFENDY' },
-                { id: '130', name: 'TT 101' },
-                { id: '140', name: 'GOR DI PANDJAITAN' }
-            ]
-        };
+        // Render catalog dynamically from localStorage
+        function renderCatalog() {
+            const inventaris = JSON.parse(localStorage.getItem("logistel_inventaris")) || [];
+            const grid = document.getElementById("catalog-grid");
+            if (!grid) return;
+            grid.innerHTML = "";
+            
+            inventaris.forEach(item => {
+                const isBarang = item.tipe === 'Barang';
+                let badgeColor = isBarang ? 'bg-red-50 border-red-100 text-telkom-700' : 'bg-emerald-50 border-emerald-100 text-emerald-700';
+                let stockBadge = "";
+                let buttonHtml = "";
+                
+                if (isBarang) {
+                    if (item.stok > 0) {
+                        stockBadge = `<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Stok: ${item.stok} Unit</span>`;
+                        buttonHtml = `
+                            <button onclick="quickBorrow('Barang', '${item.nama}')" class="w-full py-2 bg-gray-100 hover:bg-telkom-700 text-gray-700 hover:text-white font-semibold rounded-xl text-xs border border-gray-200 hover:border-telkom-600 transition-all duration-150">
+                                Pinjam Sekarang
+                            </button>
+                        `;
+                    } else {
+                        stockBadge = `<span class="bg-red-50 text-red-700 border border-red-100 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Stok Kosong</span>`;
+                        buttonHtml = `
+                            <button disabled class="w-full py-2 bg-gray-50 text-gray-400 font-semibold rounded-xl text-xs border border-gray-100 cursor-not-allowed">
+                                Stok Kosong
+                            </button>
+                        `;
+                    }
+                } else {
+                    if (item.stok > 0) {
+                        stockBadge = `<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Tersedia</span>`;
+                        buttonHtml = `
+                            <button onclick="quickBorrow('Ruangan', '${item.nama}')" class="w-full py-2 bg-gray-100 hover:bg-telkom-700 text-gray-700 hover:text-white font-semibold rounded-xl text-xs border border-gray-200 hover:border-telkom-600 transition-all duration-150">
+                                Pinjam Sekarang
+                            </button>
+                        `;
+                    } else {
+                        stockBadge = `<span class="bg-red-50 text-red-700 border border-red-100 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Terisi/Penuh</span>`;
+                        buttonHtml = `
+                            <button disabled class="w-full py-2 bg-gray-50 text-gray-400 font-semibold rounded-xl text-xs border border-gray-100 cursor-not-allowed">
+                                Terisi/Penuh
+                            </button>
+                        `;
+                    }
+                }
+                
+                const card = document.createElement("div");
+                card.className = "catalog-card bg-white border border-gray-200 hover:border-telkom-500/50 rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 group shadow-sm hover:shadow-md";
+                card.setAttribute("data-type", item.tipe);
+                card.setAttribute("data-name", item.nama.toLowerCase());
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="${badgeColor} border text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">${item.tipe}</span>
+                            ${stockBadge}
+                        </div>
+                        <h4 class="text-base font-bold text-gray-900 group-hover:text-telkom-700 transition mb-1 uppercase">${item.nama}</h4>
+                        <p class="text-xs text-gray-500 leading-relaxed mb-4">${item.deskripsi}</p>
+                    </div>
+                    ${buttonHtml}
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
 
-        // Initialize form dropdown
+        // Render history dynamically from localStorage
+        function renderRiwayatTable() {
+            const sessionUser = JSON.parse(localStorage.getItem("logistel_session")) || {};
+            const peminjamans = JSON.parse(localStorage.getItem("logistel_peminjaman")) || [];
+            
+            const userPeminjamans = peminjamans.filter(p => p.nim === sessionUser.NIM);
+            const tbody = document.querySelector("#riwayat-section tbody");
+            if (!tbody) return;
+            tbody.innerHTML = "";
+            
+            if (userPeminjamans.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500 font-medium bg-white">
+                            Belum ada riwayat pengajuan peminjaman.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            userPeminjamans.forEach(p => {
+                const tr = document.createElement("tr");
+                tr.className = "border-b border-gray-150";
+                
+                let statusBadge = "";
+                if (p.status === 'PENDING') {
+                    statusBadge = `
+                        <span class="inline-flex items-center gap-1.5 text-xs text-amber-700 font-semibold bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            PENDING
+                        </span>
+                    `;
+                } else if (p.status === 'APPROVED') {
+                    statusBadge = `
+                        <span class="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            APPROVED
+                        </span>
+                    `;
+                } else if (p.status === 'REJECTED') {
+                    statusBadge = `
+                        <span class="inline-flex items-center gap-1.5 text-xs text-red-700 font-semibold bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full" title="${p.catatan || 'Ditolak oleh admin'}">
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                            REJECTED
+                        </span>
+                    `;
+                } else if (p.status === 'RETURNED') {
+                    statusBadge = `
+                        <span class="inline-flex items-center gap-1.5 text-xs text-blue-700 font-semibold bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                            RETURNED
+                        </span>
+                    `;
+                }
+                
+                let barcodeCell = `<td class="px-6 py-4 text-center text-gray-400 font-mono text-xs">-</td>`;
+                if (p.status === 'APPROVED') {
+                    barcodeCell = `
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="openBarcodeModal('${p.id}', '${p.itemNama}', '${p.barcode}')" class="px-2.5 py-1 bg-red-50 border border-red-200 hover:bg-red-100 text-telkom-700 text-xs font-semibold rounded-md transition font-mono">
+                                Lihat Barcode
+                            </button>
+                        </td>
+                    `;
+                } else if (p.status === 'RETURNED') {
+                    barcodeCell = `
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="openBarcodeModal('${p.id}', '${p.itemNama} (Returned)', '${p.barcode || 'RETURNED'}')" class="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-md transition font-mono">
+                                Arsip Barcode
+                            </button>
+                        </td>
+                    `;
+                }
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-mono text-telkom-700">#${p.id}</td>
+                    <td class="px-6 py-4 font-semibold text-gray-900">${p.namaKegiatan}</td>
+                    <td class="px-6 py-4 text-gray-600">${p.itemNama} (${p.jenis === 'Barang' ? `${p.jumlah} Unit` : 'Ruangan'})</td>
+                    <td class="px-6 py-4 text-gray-500 font-mono text-xs">${p.tanggalMulai} s/d ${p.tanggalSelesai}</td>
+                    <td class="px-6 py-4">${statusBadge}</td>
+                    ${barcodeCell}
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Initialize form dropdown using localStorage data
         function populateDropdown(type, selectedItemValue = null) {
             const dropdown = document.getElementById('id_item');
             dropdown.innerHTML = '';
             
-            const options = inventarisData[type];
+            const inventaris = JSON.parse(localStorage.getItem("logistel_inventaris")) || [];
+            const options = inventaris.filter(item => item.tipe === type);
+            
             options.forEach(opt => {
                 const element = document.createElement('option');
                 element.value = opt.id;
-                element.text = opt.name;
+                element.text = opt.nama;
                 element.className = "bg-white text-gray-800";
-                if (selectedItemValue && opt.name.toUpperCase().includes(selectedItemValue.toUpperCase())) {
+                if (selectedItemValue && opt.nama.toUpperCase().includes(selectedItemValue.toUpperCase())) {
                     element.selected = true;
                 }
                 dropdown.appendChild(element);
@@ -744,7 +810,6 @@
         }
 
         // Filter Catalog Cards (Semua / Barang / Ruangan)
-        // Light Mode styling helper for filter buttons
         function filterCatalog(filterType) {
             document.querySelectorAll('.catalog-filter-btn').forEach(btn => {
                 btn.className = "catalog-filter-btn px-4 py-1.5 text-xs font-semibold rounded-lg text-gray-500 hover:text-gray-900 transition";
@@ -769,6 +834,7 @@
         }
 
         // Search Catalog Cards by Text
+        // Case insensitive search
         function searchCatalog() {
             const query = document.getElementById('catalog-search').value.toLowerCase().trim();
             document.querySelectorAll('.catalog-card').forEach(card => {
@@ -857,6 +923,100 @@
 
             // Close modal
             closeEditProfileModal();
+        });
+
+        // Form Submit Handler for Peminjaman
+        document.getElementById('peminjaman-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Re-validate session user active status before submitting
+            const sessionUser = JSON.parse(localStorage.getItem("logistel_session"));
+            if (!sessionUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const users = JSON.parse(localStorage.getItem("logistel_users")) || [];
+            const dbUser = users.find(u => u.Username.toLowerCase() === sessionUser.Email.toLowerCase());
+            if (!dbUser || dbUser.Status !== "Aktif") {
+                localStorage.removeItem("logistel_session");
+                alert("Akses Ditolak. Akun Anda dinonaktifkan! Anda akan diarahkan ke halaman login.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const nim = document.getElementById('nim').value;
+            const ormawa = document.getElementById('nama_ormawa').value;
+            const jenis = document.getElementById('tipe_inventaris').value;
+            
+            const dropdown = document.getElementById('id_item');
+            const selectedOption = dropdown.options[dropdown.selectedIndex];
+            if (!selectedOption) {
+                alert("Silakan pilih item terlebih dahulu.");
+                return;
+            }
+            const itemId = selectedOption.value;
+            const itemNama = selectedOption.text;
+            
+            const jumlah = jenis === 'Barang' ? parseInt(document.getElementById('jumlah').value) || 1 : 1;
+            const namaKegiatan = document.getElementById('nama_kegiatan').value.trim();
+            const tanggalMulai = document.getElementById('tanggal_mulai').value;
+            const tanggalSelesai = document.getElementById('tanggal_selesai').value;
+            const deskripsi = document.getElementById('deskripsi').value.trim();
+
+            // Validate inventory exists & has enough stock
+            const inventaris = JSON.parse(localStorage.getItem("logistel_inventaris")) || [];
+            const itemDb = inventaris.find(item => item.id === itemId);
+            if (!itemDb) {
+                alert("Item tidak ditemukan dalam database.");
+                return;
+            }
+
+            if (jenis === 'Barang' && itemDb.stok < jumlah) {
+                alert(`Gagal mengajukan peminjaman. Stok ${itemDb.nama} tidak mencukupi (Tersedia: ${itemDb.stok} unit).`);
+                return;
+            }
+
+            if (jenis === 'Ruangan' && itemDb.stok <= 0) {
+                alert(`Gagal mengajukan peminjaman. Ruangan ${itemDb.nama} sedang tidak tersedia (terisi/penuh).`);
+                return;
+            }
+
+            // Generate unique transaction ID
+            const newId = 'PMJ-' + (Math.floor(Math.random() * 900) + 100);
+            const newPeminjaman = {
+                id: newId,
+                nim: nim,
+                ormawa: ormawa,
+                jenis: jenis,
+                itemId: itemId,
+                itemNama: itemNama,
+                jumlah: jumlah,
+                namaKegiatan: namaKegiatan,
+                tanggalMulai: tanggalMulai,
+                tanggalSelesai: tanggalSelesai,
+                deskripsi: deskripsi,
+                status: 'PENDING',
+                barcode: '-'
+            };
+
+            const peminjamans = JSON.parse(localStorage.getItem("logistel_peminjaman")) || [];
+            peminjamans.push(newPeminjaman);
+            localStorage.setItem("logistel_peminjaman", JSON.stringify(peminjamans));
+
+            // Clear input fields (except read-only ones)
+            document.getElementById('nama_kegiatan').value = '';
+            document.getElementById('tanggal_mulai').value = '';
+            document.getElementById('tanggal_selesai').value = '';
+            document.getElementById('deskripsi').value = '';
+            if (jenis === 'Barang') {
+                document.getElementById('jumlah').value = '1';
+            }
+
+            alert(`Sukses! Pengajuan peminjaman #${newId} berhasil dikirim.`);
+            
+            // Sync UI
+            renderRiwayatTable();
+            switchTab('riwayat-tab', 'riwayat-section');
         });
     </script>
 </body>
