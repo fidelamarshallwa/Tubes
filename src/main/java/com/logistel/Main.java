@@ -1,9 +1,9 @@
 package com.logistel;
 
+import com.logistel.config.DatabaseConfig;
 import com.logistel.model.Admin;
 import com.logistel.model.AuthService;
 import com.logistel.model.Barang;
-import com.logistel.model.DatabaseConfig;
 import com.logistel.model.DetailPeminjamanBarang;
 import com.logistel.model.DetailPeminjamanRuangan;
 import com.logistel.model.IManajemenStok;

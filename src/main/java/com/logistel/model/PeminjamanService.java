@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.logistel.config.DatabaseConfig;
+
 /**
  * Kelas PeminjamanService menangani logika bisnis (DAO/DAO Service) transaksi peminjaman
  * barang dan ruangan, termasuk pengajuan dan verifikasi persetujuan (approval/return) admin.

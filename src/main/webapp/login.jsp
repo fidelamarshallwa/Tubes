@@ -1,10 +1,10 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LogisTel - Masuk Portal Logistik</title>
-    <!-- Tailwind CSS v3 via Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -28,7 +28,6 @@
             }
         }
     </script>
-    <!-- Google Font: Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -37,19 +36,14 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-    <!-- Subtle top crimson bar -->
     <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-telkom-700 to-red-500"></div>
 
     <div class="w-full max-w-md z-10">
-        <!-- Main Card: Logasset Tel-U Theme -->
         <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm transition-all duration-300 hover:shadow-md">
             
-            <!-- Campus Header -->
             <div class="flex flex-col items-center text-center mb-8">
-                <!-- Tel-U Shield-Style Crest Icon -->
                 <div class="w-16 h-16 rounded-xl bg-telkom-700 p-0.5 shadow-sm mb-4 flex items-center justify-center">
                     <div class="w-full h-full bg-white rounded-[10px] flex items-center justify-center overflow-hidden relative group">
-                        <!-- Custom styled university crest SVG -->
                         <svg class="w-8 h-8 text-telkom-700 transform group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 2L2 7v7c0 5.25 4.2 10.13 10 11 5.8-0.87 10-5.75 10-11V7L12 2zm0 4.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5zm0 15c-3.75-1-6.5-4.57-6.5-8.5V8.55l6.5-3.25 6.5 3.25V13c0 3.93-2.75 7.5-6.5 8.5z"/>
                             <path d="M9 13.5h6v1.5H9z"/>
@@ -61,17 +55,21 @@
                 <div class="w-12 h-1 bg-telkom-700 rounded-full mt-3"></div>
             </div>
 
-            <!-- Client-side error alert message -->
-            <div id="error-alert" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-3 hidden transition-all duration-200">
-                <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                <div id="error-message" class="font-medium">Kredensial Akun Salah!</div>
-            </div>
+            <% 
+                String error = (String) request.getAttribute("error");
+                if (error != null) {
+            %>
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-3 transition-all duration-200">
+                    <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div class="font-medium"><%= error %></div>
+                </div>
+            <% 
+                } 
+            %>
 
-            <!-- Login Form -->
-            <form id="login-form" action="login" method="POST" class="space-y-6">
-                <!-- Username / Email Field -->
+            <form action="${pageContext.request.contextPath}/login-process" method="POST" class="px-8 pb-10 space-y-4">
                 <div>
                     <label for="username" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Username / Email SSO</label>
                     <div class="relative">
@@ -85,7 +83,6 @@
                     </div>
                 </div>
 
-                <!-- Password Field -->
                 <div>
                     <div class="flex justify-between items-center mb-2">
                         <label for="password" class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Kata Sandi</label>
@@ -100,7 +97,6 @@
                         <input type="password" name="password" id="password" placeholder="••••••••" required
                             class="w-full pl-11 pr-11 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-telkom-500/20 focus:border-telkom-700 transition-all duration-200 text-sm">
                         <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none transition">
-                            <!-- Eye icon -->
                             <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -109,7 +105,6 @@
                     </div>
                 </div>
 
-                <!-- Role Selection Field -->
                 <div>
                     <label for="role" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Pilih Peran (Role)</label>
                     <div class="relative">
@@ -132,115 +127,22 @@
                     </div>
                 </div>
 
-                <!-- Submit Button -->
                 <button type="submit"
                     class="w-full py-3 px-4 bg-telkom-700 hover:bg-telkom-800 text-white font-bold rounded-xl shadow-sm hover:shadow transition-all duration-150 text-sm">
                     Masuk ke Akun
                 </button>
+                <p class="text-center text-xs text-gray-500 mt-6">
+                    Belum punya akun? <a href="${pageContext.request.contextPath}/register.jsp" class="text-telkom-700 font-bold hover:underline">Daftar di sini</a>
+                </p>
             </form>
         </div>
 
-        <!-- Footer Credits -->
         <p class="text-center text-gray-400 text-xs mt-6">
             &copy; 2026 LogisTel - Universitas Telkom. Hak Cipta Dilindungi.
         </p>
     </div>
 
-    <!-- Password visibility toggle script -->
     <script>
-        // Initialize default users database if not exists
-        if (!localStorage.getItem("logistel_users")) {
-            const defaultUsers = [
-                {
-                    Nama: "Fidela Marshallwa",
-                    Username: "adminfidelamarshallwa",
-                    Password: "salwa",
-                    Role: "Admin",
-                    Identitas: "198711032014022",
-                    Ormawa: "Logistik Kampus",
-                    Email: "admin@logistel.id",
-                    HP: "081122334455",
-                    Status: "Aktif"
-                },
-                {
-                    Nama: "Alya Maghfira",
-                    Username: "alyamaghfira@student.telkomuniversity.ac.id",
-                    Password: "alya",
-                    Role: "User",
-                    Identitas: "103112400240",
-                    Ormawa: "HMIF",
-                    Email: "alyamaghfira@student.telkomuniversity.ac.id",
-                    HP: "081234567890",
-                    Status: "Aktif"
-                }
-            ];
-            localStorage.setItem("logistel_users", JSON.stringify(defaultUsers));
-        }
-
-        // Auto-redirect if already logged in with an active account
-        const existingSession = localStorage.getItem("logistel_session");
-        if (existingSession) {
-            try {
-                const sessionUser = JSON.parse(existingSession);
-                const usersList = JSON.parse(localStorage.getItem("logistel_users")) || [];
-                const currentUserData = usersList.find(u => u.Username.toLowerCase() === sessionUser.Email.toLowerCase());
-                if (currentUserData && currentUserData.Status === "Aktif") {
-                    if (sessionUser.Role === 'Admin') {
-                        window.location.href = 'dashboard-admin.html';
-                    } else if (sessionUser.Role === 'User') {
-                        window.location.href = 'dashboard-user.html';
-                    }
-                }
-            } catch (e) {
-                localStorage.removeItem("logistel_session");
-            }
-        }
-
-        // Initialize default global inventory and reset history (Fresh Start)
-        const defaultInventaris = [
-            {
-                id: "B001",
-                nama: "Kamera",
-                tipe: "Barang",
-                stok: 10,
-                deskripsi: "Peralatan dokumentasi resolusi tinggi untuk event atau publikasi ormawa."
-            },
-            {
-                id: "B003",
-                nama: "Mic Wireless",
-                tipe: "Barang",
-                stok: 8,
-                deskripsi: "Paket mikrofon nirkabel beserta receiver suara untuk panggung/seminar."
-            },
-            {
-                id: "B006",
-                nama: "Meja Lipat",
-                tipe: "Barang",
-                stok: 0,
-                deskripsi: "Meja portable berbahan ringan untuk stand registrasi, rapat, atau bazar ormawa."
-            },
-            {
-                id: "R001",
-                nama: "DSP 301",
-                tipe: "Ruangan",
-                stok: 1,
-                deskripsi: "Ruang kelas dengan fasilitas proyektor, AC, kapasitas maksimum 40 orang."
-            },
-            {
-                id: "R023",
-                nama: "Aula Rachmat Effendy",
-                tipe: "Ruangan",
-                stok: 0,
-                deskripsi: "Gedung pertemuan serbaguna kapasitas besar. Cocok untuk seminar akbar/wisuda."
-            }
-        ];
-
-        if (!localStorage.getItem("logistel_fresh_start")) {
-            localStorage.setItem("logistel_inventaris", JSON.stringify(defaultInventaris));
-            localStorage.setItem("logistel_peminjaman", JSON.stringify([]));
-            localStorage.setItem("logistel_fresh_start", "true");
-        }
-
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('password');
             const eyeIcon = document.getElementById('eye-icon');
@@ -258,62 +160,6 @@
                 `;
             }
         }
-
-        // Mock Authentication form interception
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const usernameInput = document.getElementById('username').value.trim();
-            const passwordInput = document.getElementById('password').value;
-            const roleInput = document.getElementById('role').value;
-            const alertBox = document.getElementById('error-alert');
-            const alertMsg = document.getElementById('error-message');
-
-            // Hide previous errors
-            alertBox.classList.add('hidden');
-
-            // Retrieve user database from localStorage
-            const users = JSON.parse(localStorage.getItem("logistel_users")) || [];
-            
-            // Find matched user using .find()
-            const matchedUser = users.find(u => 
-                u.Username.toLowerCase() === usernameInput.toLowerCase() && 
-                u.Password === passwordInput && 
-                u.Role === roleInput
-            );
-
-            if (matchedUser) {
-                // Check user status
-                if (matchedUser.Status !== "Aktif") {
-                    alertMsg.innerText = "Akun Anda berstatus tidak aktif! Silakan hubungi Administrator.";
-                    alertBox.classList.remove('hidden');
-                    return;
-                }
-
-                // Construct session data
-                const userSession = {
-                    Nama: matchedUser.Nama,
-                    NIM: matchedUser.Identitas,
-                    Ormawa: matchedUser.Ormawa,
-                    HP: matchedUser.HP || "081234567890",
-                    Email: matchedUser.Email || matchedUser.Username,
-                    Role: matchedUser.Role
-                };
-                
-                localStorage.setItem("logistel_session", JSON.stringify(userSession));
-                
-                // Redirect depending on role
-                if (matchedUser.Role === 'Admin') {
-                    window.location.href = 'dashboard-admin.html';
-                } else {
-                    window.location.href = 'dashboard-user.html';
-                }
-            } else {
-                // Show custom styled validation error
-                alertMsg.innerText = "Kredensial Akun Salah! Silakan cek kembali username, password, dan role Anda.";
-                alertBox.classList.remove('hidden');
-            }
-        });
     </script>
 </body>
 </html>

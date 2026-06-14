@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.logistel.config.DatabaseConfig;
+
 /**
  * Kelas AuthService menangani logika bisnis autentikasi (login) dan
  * registrasi akun pengguna baru ke database MySQL.
