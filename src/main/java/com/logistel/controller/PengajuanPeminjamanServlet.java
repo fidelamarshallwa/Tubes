@@ -67,8 +67,6 @@ public class PengajuanPeminjamanServlet extends HttpServlet {
             boolean isBentrok = false;
             
             if ("Barang".equalsIgnoreCase(tipe)) {
-                // Catatan: Jika barang memiliki stok banyak, logika ini bisa disesuaikan. 
-                // Query ini mengasumsikan unit barang spesifik tersebut tidak boleh dipinjam berbarengan jika beririsan waktu.
                 String sqlCheckBarang = "SELECT COUNT(*) FROM detail_peminjaman_barang db " +
                                         "JOIN peminjaman p ON db.id_peminjaman = p.id_peminjaman " +
                                         "WHERE db.id_barang = ? " +
@@ -80,7 +78,6 @@ public class PengajuanPeminjamanServlet extends HttpServlet {
                 psCheck.setString(3, tglSelesai);
                 
             } else if ("Ruangan".equalsIgnoreCase(tipe)) {
-                // Untuk Ruangan, mutlak tidak boleh ada 2 kegiatan di waktu dan ruangan yang sama
                 String sqlCheckRuangan = "SELECT COUNT(*) FROM detail_peminjaman_ruangan dr " +
                                          "JOIN peminjaman p ON dr.id_peminjaman = p.id_peminjaman " +
                                          "WHERE dr.id_ruangan = ? " +
@@ -99,7 +96,7 @@ public class PengajuanPeminjamanServlet extends HttpServlet {
                 }
             }
 
-            // Jika terdeteksi bentrok jadwal, gagalkan pengajuan dan kembalikan status error
+            // Jika terdeteksi bentrok jadwal, gagalkan pengajuan
             if (isBentrok) {
                 conn.rollback();
                 response.sendRedirect("dashboard-user.jsp?status=bentrok");
@@ -107,19 +104,18 @@ public class PengajuanPeminjamanServlet extends HttpServlet {
             }
 
             // =================================================================
-            // 3. INSERT KE TABEL INDUK (peminjaman)
+            // 3. INSERT KE TABEL INDUK (peminjaman) -> DISESUAIKAN DENGAN SQL DUMP
             // =================================================================
-            String sqlPeminjaman = "INSERT INTO peminjaman (id_user, tanggal_mulai, tanggal_selesai, nama_kegiatan, deskripsi, status, barcode) VALUES (?, ?, ?, ?, ?, 'PENDING', ?)";
+            // Kolom nama_kegiatan dan deskripsi dihapus dari query ini karena tidak ada di tabel peminjaman
+            String sqlPeminjaman = "INSERT INTO peminjaman (id_user, tanggal_mulai, tanggal_selesai, status, barcode) VALUES (?, ?, ?, 'PENDING', ?)";
             psPeminjaman = conn.prepareStatement(sqlPeminjaman, Statement.RETURN_GENERATED_KEYS);
             
             psPeminjaman.setInt(1, idUserFix); 
             psPeminjaman.setString(2, tglMulai);
             psPeminjaman.setString(3, tglSelesai);
-            psPeminjaman.setString(4, kegiatan);
-            psPeminjaman.setString(5, deskripsi);
             
             String barcodeData = java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-            psPeminjaman.setString(6, barcodeData);
+            psPeminjaman.setString(4, barcodeData);
             
             psPeminjaman.executeUpdate();
 
@@ -131,7 +127,7 @@ public class PengajuanPeminjamanServlet extends HttpServlet {
             }
 
             // =================================================================
-            // 4. INSERT KE TABEL DETAIL (Barang / Ruangan)
+            // 4. INSERT KE TABEL DETAIL (Di sini nama_kegiatan & deskripsi dimasukkan)
             // =================================================================
             if (idPeminjamanGenerated != 0) {
                 if ("Barang".equalsIgnoreCase(tipe)) {
@@ -160,7 +156,7 @@ public class PengajuanPeminjamanServlet extends HttpServlet {
                 }
             }
 
-            conn.commit(); // Sukses total, simpan permanen ke MySQL
+            conn.commit(); // Sukses total, simpan permanen ke MySQL Railway
             response.sendRedirect("dashboard-user.jsp?status=berhasil");
 
         } catch (Exception e) {
